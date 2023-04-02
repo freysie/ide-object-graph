@@ -27,7 +27,7 @@ import SpriteKit
 //  //4: [5, 6, 7, 8, 9],
 //]
 
-open class ObjectGraphViewController: NSViewController, ObjectGraphViewDataSource {
+open class ObjectGraphViewController: NSViewController, ObjectGraphViewDataSource, ObjectGraphViewDelegate {
   open var graphView: ObjectGraphView!
 
   open override func loadView() {
@@ -35,6 +35,7 @@ open class ObjectGraphViewController: NSViewController, ObjectGraphViewDataSourc
 
     graphView = ObjectGraphView()
     graphView.dataSource = self
+    graphView.graphDelegate = self
     graphView.autoresizingMask = [.width, .height]
     view.addSubview(graphView)
 

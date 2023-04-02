@@ -1,6 +1,6 @@
 # IDE Object Graph
 
-Object graph for AppKit.
+Object graph UI for AppKit.
 
 <img src="/Screenshots/IDEObjectGraph@2x.png?raw=true" width="1012">
 

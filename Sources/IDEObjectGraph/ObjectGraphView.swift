@@ -19,12 +19,13 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   private static let scaleAnimationKey = "scale"
 
   public weak var dataSource: ObjectGraphViewDataSource?
+  public weak var graphDelegate: ObjectGraphViewDelegate?
+  //public weak var delegate: ObjectGraphViewDelegate?
 
   var elements = [ObjectGraphElement]()
   var nodes = [ObjectGraphNode]()
   var references = [ObjectGraphReference]()
   var debugElements = [ObjectGraphDebugElement]()
-  var pivotNodeIdentifier = 0
 
   var offscreenIndicator: ObjectGraphOffscreenIndicator!
 
@@ -46,6 +47,8 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     wantsLayer = true
     ignoresSiblingOrder = true
 
+    presentScene(ObjectGraphScene())
+
     // showsPhysics = true
     // showsFPS = true
     // showsDrawCount = true
@@ -58,6 +61,14 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
 
     let magnification = NSMagnificationGestureRecognizer(target: self, action: #selector(handleMagnificationGesture(_:)))
     addGestureRecognizer(magnification)
+
+    let click = NSClickGestureRecognizer(target: self, action: #selector(handleClickGesture(_:)))
+    click.delegate = self
+    addGestureRecognizer(click)
+
+    let doubleClick = NSClickGestureRecognizer(target: self, action: #selector(handleDoubleClickGesture(_:)))
+    doubleClick.numberOfClicksRequired = 2
+    addGestureRecognizer(doubleClick)
 
     let press = NSPressGestureRecognizer(target: self, action: #selector(handlePressGesture(_:)))
     press.minimumPressDuration = 0
@@ -177,7 +188,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   // MARK: - Scaling
 
   func cellSize(forScale scale: Double) -> CGSize {
-    CGSize(width: 75 * scale, height: 50 * scale)
+    CGSize(width: 75 / scale, height: 50 / scale)
   }
 
   // func cameraScale(forScale scale: Double) -> Double {
@@ -204,8 +215,6 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   }
 
   func updateElementSizes(animated: Bool = false) {
-    guard pivotNodeIdentifier != -1 else { return }
-
     // for element in elements {
     //   element.layoutSize = cellSize
     // }
@@ -219,8 +228,8 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
       } else {
         node.setScale(scale)
       }
-      //node.layoutSize = cellSize
-      node.layoutSize = CGSize(width: 75.0 / scale, height: 50.0 / scale)
+
+      node.layoutSize = cellSize
       node.repositionLabel()
     }
 
@@ -240,23 +249,17 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
         // reference.run(action, withKey: Self.scaleAnimationKey)
 
         reference.setScale(scale)
-
       } else {
         reference.setScale(scale)
       }
 
-      //reference.cellSize = 56.0 / scale
-      //reference.layoutSize = cellSize
-      reference.layoutSize = CGSize(width: 75.0 / scale, height: 50.0 / scale)
-      //reference.layoutSize = cellSize
-      //node.cellSize = 56.0 / scale
-      //node.draw()
+      reference.layoutSize = cellSize
       reference.draw()
     }
 
     for d in debugElements {
       d.isHidden = !showsDebugElements
-      d.layoutSize = CGSize(width: 75.0 / scale, height: 50.0 / scale)
+      d.layoutSize = cellSize
     }
 
     offscreenIndicator.setScale(scale)
@@ -330,21 +333,37 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     magnify(at: sender.location(in: self), scale: initialMagnificationScale + sender.magnification, animated: false)
   }
 
-  @objc func handlePressGesture(_ sender: NSPressGestureRecognizer) {
-    if let element = element(atViewLocation: sender.location(in: self)) {
-      if let node = selectedElement as? ObjectGraphNode {
-        node.isSelected = false
-        node.isHighlighted = false
-      }
+  @objc func handleClickGesture(_ sender: NSClickGestureRecognizer) {
+    //print((#function, sender))
 
-      selectedElement = element
-
-      if let node = element as? ObjectGraphNode {
-        node.isSelected = true
-      }
-    } else {
-      //selectedElement = nil
+    if let node = element(atViewLocation: sender.location(in: self)) as? ObjectGraphNode {
+      graphDelegate?.objectGraphView?(self, didClickNode: node)
     }
+  }
+
+  @objc func handleDoubleClickGesture(_ sender: NSClickGestureRecognizer) {
+    //print((#function, sender))
+
+    if let node = element(atViewLocation: sender.location(in: self)) as? ObjectGraphNode {
+      graphDelegate?.objectGraphView?(self, didDoubleClickNode: node)
+    }
+  }
+
+  @objc func handlePressGesture(_ sender: NSPressGestureRecognizer) {
+//    if let element = element(atViewLocation: sender.location(in: self)) {
+//      if let node = selectedElement as? ObjectGraphNode {
+//        node.isSelected = false
+//        node.isHighlighted = false
+//      }
+//
+//      selectedElement = element
+//
+//      if let node = element as? ObjectGraphNode {
+//        node.isSelected = true
+//      }
+//    } else {
+//      //selectedElement = nil
+//    }
   }
 
   public func gestureRecognizer(_: NSGestureRecognizer, shouldRecognizeSimultaneouslyWith _: NSGestureRecognizer) -> Bool {

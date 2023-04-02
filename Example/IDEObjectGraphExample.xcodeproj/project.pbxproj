@@ -10,13 +10,16 @@
 		3BB2124329D7588A00A957E9 /* IDEObjectGraphExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB2124229D7588A00A957E9 /* IDEObjectGraphExampleApp.swift */; };
 		3BB629B129D758F800D82AD2 /* IDEObjectGraph in Frameworks */ = {isa = PBXBuildFile; productRef = 3BB629B029D758F800D82AD2 /* IDEObjectGraph */; };
 		3BFC9FF129D9ED3F002B0FC2 /* PostgresQueryPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFC9FF029D9ED3F002B0FC2 /* PostgresQueryPlan.swift */; };
+		3BFC9FF629DA1DB5002B0FC2 /* Query Plans in Resources */ = {isa = PBXBuildFile; fileRef = 3BFC9FF529DA1DB5002B0FC2 /* Query Plans */; };
+		3BFC9FF929DA2976002B0FC2 /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 3BFC9FF829DA2976002B0FC2 /* Yams */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3BB2123F29D7588A00A957E9 /* IDEObjectGraphExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IDEObjectGraphExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BB2124229D7588A00A957E9 /* IDEObjectGraphExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDEObjectGraphExampleApp.swift; sourceTree = "<group>"; };
-		3BB629AE29D758E900D82AD2 /* IDEObjectGraph */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = ide-object-graph; path = ..; sourceTree = "<group>"; };
+		3BB629AE29D758E900D82AD2 /* ide-object-graph */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "ide-object-graph"; path = ..; sourceTree = "<group>"; };
 		3BFC9FF029D9ED3F002B0FC2 /* PostgresQueryPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostgresQueryPlan.swift; sourceTree = "<group>"; };
+		3BFC9FF529DA1DB5002B0FC2 /* Query Plans */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Query Plans"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -24,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BFC9FF929DA2976002B0FC2 /* Yams in Frameworks */,
 				3BB629B129D758F800D82AD2 /* IDEObjectGraph in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -36,6 +40,7 @@
 			children = (
 				3BB2124229D7588A00A957E9 /* IDEObjectGraphExampleApp.swift */,
 				3BFC9FF029D9ED3F002B0FC2 /* PostgresQueryPlan.swift */,
+				3BFC9FF529DA1DB5002B0FC2 /* Query Plans */,
 				3BB629AD29D758E900D82AD2 /* Packages */,
 				3BB2124029D7588A00A957E9 /* Products */,
 				3BB629AF29D758F800D82AD2 /* Frameworks */,
@@ -53,7 +58,7 @@
 		3BB629AD29D758E900D82AD2 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				3BB629AE29D758E900D82AD2 /* IDEObjectGraph */,
+				3BB629AE29D758E900D82AD2 /* ide-object-graph */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -83,6 +88,7 @@
 			name = IDEObjectGraphExample;
 			packageProductDependencies = (
 				3BB629B029D758F800D82AD2 /* IDEObjectGraph */,
+				3BFC9FF829DA2976002B0FC2 /* Yams */,
 			);
 			productName = IDEObjectGraphExample;
 			productReference = 3BB2123F29D7588A00A957E9 /* IDEObjectGraphExample.app */;
@@ -112,6 +118,9 @@
 				Base,
 			);
 			mainGroup = 3BB2123629D7588A00A957E9;
+			packageReferences = (
+				3BFC9FF729DA2976002B0FC2 /* XCRemoteSwiftPackageReference "Yams" */,
+			);
 			productRefGroup = 3BB2124029D7588A00A957E9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -126,6 +135,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BFC9FF629DA1DB5002B0FC2 /* Query Plans in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,10 +358,26 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		3BFC9FF729DA2976002B0FC2 /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		3BB629B029D758F800D82AD2 /* IDEObjectGraph */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = IDEObjectGraph;
+		};
+		3BFC9FF829DA2976002B0FC2 /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BFC9FF729DA2976002B0FC2 /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,5 +1,6 @@
 import AppKit
 import IDEObjectGraph
+import Yams
 
 struct PostgresQueryPlan {
   let nodeType: String
@@ -7,17 +8,31 @@ struct PostgresQueryPlan {
   let relationName: String?
   let indexName: String?
   let subplans: [PostgresQueryPlan]
+  let info: [Node.Mapping.Element]
 
-  init(_ array: [[String: [String: Any]]]) {
-    self.init(array[0]["Plan"]!)
+  init?(_ node: Node) {
+    var node = node
+    if let plan = node[0]?["Plan"] { node = plan }
+    guard let nodeType = node["Node Type"]?.string else { return nil }
+    self.nodeType = nodeType
+    joinType = node["Join Type"]?.string
+    relationName = node["Relation Name"]?.string
+    indexName = node["Index Name"]?.string
+    subplans = node["Plans"]?.array().compactMap { PostgresQueryPlan($0) } ?? []
+    info = node.mapping!.filter { !["Plans"].contains($0.key) }
   }
+}
 
-  init(_ dictionary: [String: Any]) {
-    nodeType = dictionary["Node Type"] as! String
-    joinType = dictionary["Join Type"] as? String
-    relationName = dictionary["Relation Name"] as? String
-    indexName = dictionary["Index Name"] as? String
-    subplans = (dictionary["Plans"] as? [[String: Any]])?.map { PostgresQueryPlan($0) } ?? []
+extension PostgresQueryPlan {
+  var objectGraphNode: ObjectGraphNode {
+    let node = ObjectGraphNode(
+      systemSymbolName: systemSymbolName,
+      backgroundColor: backgroundColor,
+      //label: indexName ?? relationName ?? nodeType
+      label: nodeType
+    )
+    node.representedObject = self
+    return node
   }
 
   var systemSymbolName: String {
@@ -56,18 +71,5 @@ struct PostgresQueryPlan {
     case "WindowAgg": return .systemPink
     default: return nil
     }
-  }
-}
-
-extension PostgresQueryPlan {
-  var objectGraphNode: ObjectGraphNode {
-    let node = ObjectGraphNode(
-      systemSymbolName: systemSymbolName,
-      backgroundColor: backgroundColor,
-      //label: indexName ?? relationName ?? nodeType
-      label: nodeType
-    )
-    node.representedObject = self
-    return node
   }
 }
