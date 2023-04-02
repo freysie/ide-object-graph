@@ -13,13 +13,15 @@ public class ObjectGraphNode: ObjectGraphElement {
   var isHighlighted = false { didSet { updateState() } }
   var isSelected = false { didSet { updateState() } }
 
+  public var representedObject: Any?
+
   override var layoutSize: CGSize { didSet { updateSize() } }
 
-  public convenience init(imageSystemName: String, backgroundColor: NSColor? = nil, label: String, badge: String? = nil) {
-    var image = NSImage(systemSymbolName: imageSystemName, accessibilityDescription: nil)!
+  public convenience init(systemSymbolName: String, backgroundColor: NSColor? = nil, label: String, badge: String? = nil) {
+    var image = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)!
       .withSymbolConfiguration(
         NSImage.SymbolConfiguration(pointSize: backgroundColor == nil ? 36 : 30, weight: .regular)
-          .applying(NSImage.SymbolConfiguration.init(hierarchicalColor: backgroundColor == nil ? objectColor : .white))
+          .applying(NSImage.SymbolConfiguration.init(paletteColors: [backgroundColor == nil ? objectColor : .white]))
       )!
 
     if let backgroundColor {
@@ -56,12 +58,17 @@ public class ObjectGraphNode: ObjectGraphElement {
     labelNode = SKLabelNode(text: label)
     labelNode.fontName = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize).fontName
     labelNode.fontSize = NSFont.smallSystemFontSize
-    //labelNode.truncation
-    labelNode.position = CGPoint(x: 0, y: -iconNode.size.height)
+    labelNode.position = CGPoint(x: 0, y: -44)
+    labelNode.numberOfLines = 1
+    //labelNode.preferredMaxLayoutWidth = 10
+    //labelNode.lineBreakMode = .byTruncatingMiddle
+    //labelNode.horizontalAlignmentMode = .center
     //titleLabel.attributedText
     addChild(labelNode)
 
-    let labelHighlightRect = labelNode.calculateAccumulatedFrame().insetBy(dx: -4, dy: -2.5)
+    var labelHighlightRect = labelNode.calculateAccumulatedFrame().insetBy(dx: -4, dy: -2.5)
+    labelHighlightRect.size.height = max(18, labelHighlightRect.size.height)
+
     labelHighlightNode = SKShapeNode(rect: labelHighlightRect, cornerRadius: 5)
     labelHighlightNode.zPosition = -1
     labelHighlightNode.strokeColor = .clear
@@ -76,7 +83,9 @@ public class ObjectGraphNode: ObjectGraphElement {
   }
 
   func repositionLabel() {
-    labelNode.position = CGPoint(x: 0, y: -iconNode.size.height * labelNode.xScale)
+    labelNode.position = CGPoint(x: 0, y: -44 * labelNode.xScale)
+    labelNode.preferredMaxLayoutWidth = layoutSize.width
+    print(labelNode.preferredMaxLayoutWidth)
   }
 
   func updateSize() {
@@ -92,7 +101,7 @@ public class ObjectGraphNode: ObjectGraphElement {
   }
 
   override func handleEvent(_ event: NSEvent) {
-    let isHoveringIcon = iconNode.contains(event.location(in: self))
+    let isHoveringIcon = iconHighlightNode.contains(event.location(in: self))
     isHighlighted = isHoveringIcon
   }
 

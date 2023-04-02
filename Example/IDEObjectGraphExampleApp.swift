@@ -27,94 +27,6 @@ struct IDEObjectGraphExampleApp: App {
 // --
 // merge left join
 
-let exampleExplanation = [
-  [
-    "Plan": [
-      "Node Type": "Nested Loop",
-      "Parallel Aware": false,
-      "Async Capable": false,
-      "Join Type": "Left",
-      "Inner Unique": true,
-      "Join Filter": "(a2.question_id = a1.question_id)",
-      "Plans": [
-        [
-          "Node Type": "Hash Join",
-          "Parent Relationship": "Outer",
-          "Parallel Aware": false,
-          "Async Capable": false,
-          "Join Type": "Right",
-          "Inner Unique": true,
-          "Hash Cond": "(q.id = a1.question_id)",
-          "Plans": [
-            [
-              "Node Type": "Seq Scan",
-              "Parent Relationship": "Outer",
-              "Parallel Aware": false,
-              "Async Capable": false,
-              "Relation Name": "questions",
-              "Alias": "q"
-            ],
-            [
-              "Node Type": "Hash",
-              "Parent Relationship": "Inner",
-              "Parallel Aware": false,
-              "Async Capable": false,
-              "Plans": [
-                [
-                  "Node Type": "Bitmap Heap Scan",
-                  "Parent Relationship": "Outer",
-                  "Parallel Aware": false,
-                  "Async Capable": false,
-                  "Relation Name": "answers",
-                  "Alias": "a1",
-                  "Recheck Cond": "(profile_id = 1)",
-                  "Plans": [
-                    [
-                      "Node Type": "Bitmap Index Scan",
-                      "Parent Relationship": "Outer",
-                      "Parallel Aware": false,
-                      "Async Capable": false,
-                      "Index Name": "IDX_f5d7c43148a6a0d2eeef12e605",
-                      "Index Cond": "(profile_id = 1)"
-                    ]
-                  ]
-                ]
-              ]
-            ]
-          ]
-        ],
-        [
-          "Node Type": "Materialize",
-          "Parent Relationship": "Inner",
-          "Parallel Aware": false,
-          "Async Capable": false,
-          "Plans": [
-            [
-              "Node Type": "Bitmap Heap Scan",
-              "Parent Relationship": "Outer",
-              "Parallel Aware": false,
-              "Async Capable": false,
-              "Relation Name": "answers",
-              "Alias": "a2",
-              "Recheck Cond": "(profile_id = 2)",
-              "Plans": [
-                [
-                  "Node Type": "Bitmap Index Scan",
-                  "Parent Relationship": "Outer",
-                  "Parallel Aware": false,
-                  "Async Capable": false,
-                  "Index Name": "IDX_f5d7c43148a6a0d2eeef12e605",
-                  "Index Cond": "(profile_id = 2)"
-                ]
-              ]
-            ]
-          ]
-        ]
-      ]
-    ]
-  ]
-]
-
 let exampleExplanation2 = [
   [
     "Plan": [
@@ -216,6 +128,94 @@ let exampleExplanation2 = [
                   "Async Capable": false,
                   "CTE Name": "z",
                   "Alias": "z"
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ]
+]
+
+let exampleExplanation = [
+  [
+    "Plan": [
+      "Node Type": "Nested Loop",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Join Type": "Left",
+      "Inner Unique": true,
+      "Join Filter": "(a2.question_id = a1.question_id)",
+      "Plans": [
+        [
+          "Node Type": "Hash Join",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Join Type": "Right",
+          "Inner Unique": true,
+          "Hash Cond": "(q.id = a1.question_id)",
+          "Plans": [
+            [
+              "Node Type": "Seq Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Relation Name": "questions",
+              "Alias": "q"
+            ],
+            [
+              "Node Type": "Hash",
+              "Parent Relationship": "Inner",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Plans": [
+                [
+                  "Node Type": "Bitmap Heap Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Relation Name": "answers",
+                  "Alias": "a1",
+                  "Recheck Cond": "(profile_id = 1)",
+                  "Plans": [
+                    [
+                      "Node Type": "Bitmap Index Scan",
+                      "Parent Relationship": "Outer",
+                      "Parallel Aware": false,
+                      "Async Capable": false,
+                      "Index Name": "IDX_f5d7c43148a6a0d2eeef12e605",
+                      "Index Cond": "(profile_id = 1)"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          "Node Type": "Materialize",
+          "Parent Relationship": "Inner",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Plans": [
+            [
+              "Node Type": "Bitmap Heap Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Relation Name": "answers",
+              "Alias": "a2",
+              "Recheck Cond": "(profile_id = 2)",
+              "Plans": [
+                [
+                  "Node Type": "Bitmap Index Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Index Name": "IDX_f5d7c43148a6a0d2eeef12e605",
+                  "Index Cond": "(profile_id = 2)"
                 ]
               ]
             ]

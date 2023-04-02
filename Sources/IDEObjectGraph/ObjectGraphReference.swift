@@ -35,9 +35,9 @@ class ObjectGraphReference: ObjectGraphElement {
     let path = NSBezierPath()
     //path.addArrow(start: CGPoint(x: iconSize / 2 + 8, y: 0), end: CGPoint(x: iconSize / 2 + 8 + gridSize, y: gridSize), pointerLineLength: 8, arrowAngle: CGFloat(Double.pi / 4))
     path.move(to: CGPoint(x: iconSize / 2 + 8, y: 0))
-    let arrowStart = CGPoint(x: layoutSize.width / 2, y: layoutSize.height / 2 * endGridPosition.y)
+    let arrowStart = CGPoint(x: layoutSize.width / 2 - 2, y: layoutSize.height / 2 * endGridPosition.y)
     if endGridPosition.y != 0 {
-      path.line(to: CGPoint(x: layoutSize.width / 2, y: 0))
+      path.line(to: CGPoint(x: layoutSize.width / 2 - 2, y: 0))
       path.line(to: arrowStart)
     }
     path.addArrow(

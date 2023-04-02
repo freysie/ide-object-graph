@@ -3,11 +3,7 @@ import SpriteKit
 let showsDebugElements = false
 
 @objc public protocol ObjectGraphViewDataSource: NSObjectProtocol {
-//  -(void)enumerateIncomingReferencesForNode:(unsigned int)arg0 withBlock:(id)arg1 ;
-//  -(void)enumerateOutgoingReferencesForNode:(unsigned int)arg0 withBlock:(id)arg1 ;
-
   @objc optional func incomingReferences(for node: ObjectGraphNode) -> [ObjectGraphNode]
-
   @objc optional func outgoingReferences(for node: ObjectGraphNode) -> [ObjectGraphNode]
 }
 
@@ -43,6 +39,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     wantsLayer = true
     ignoresSiblingOrder = true
 
+    // showsPhysics = true
     // showsFPS = true
     // showsDrawCount = true
     // showsNodeCount = true
@@ -68,7 +65,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   func setPivotNode(_ node: ObjectGraphNode) {
     let scene = ObjectGraphScene()
 
-    node.position = CGPoint(x: scene.size.width / 2, y: scene.size.height / 2)
+    //node.position = CGPoint(x: scene.size.width / 2, y: scene.size.height / 2)
     scene.addChild(node)
     nodes.append(node)
     let d = ObjectGraphDebugElement()
@@ -77,11 +74,14 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
 
     func addNodes(for node: ObjectGraphNode, iteration: Int = 1) {
       guard let dataSource, let references = dataSource.incomingReferences?(for: node) else { return }
-      print(references)
+      //print(references)
       //let yStart = references.count == 1 ? 0.0 : (CGFloat(references.count) * cellSize.height) / (references.count % 2 == 0 ? -4 : -4)
       //let yStart = 0.0
-      var yStart = references.count == 1 ? 0.0 : CGFloat(references.count) / -2 * cellSize.height / 2
-      if references.count > 1, references.count % 2 != 0 { yStart -= cellSize.height / 4 }
+
+      //var yStart = references.count == 1 ? 0.0 : CGFloat(references.count) / -2 * cellSize.height / 2
+      //if references.count > 1, references.count % 2 != 0 { yStart -= cellSize.height / 4 }
+      let yStart = references.count > 1 ? (cellSize.height / 2 - cellSize.height * CGFloat(references.count) / 2) : 0
+
       for (i, referencedNode) in references.reversed().enumerated() {
         referencedNode.position = CGPoint(
           x: node.position.x - cellSize.width,// * CGFloat(iteration),
@@ -90,13 +90,20 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
         scene.addChild(referencedNode)
         nodes.append(referencedNode)
         let d = ObjectGraphDebugElement()
-        d.gridPosition = CGPoint(x: -CGFloat(iteration), y: CGFloat(i))
+        d.gridPosition = CGPoint(x: -CGFloat(iteration), y: CGFloat(i) - (CGFloat(references.count) / 2).rounded(.down))
         referencedNode.addChild(d)
         debugElements.append(d)
 
+        // referencedNode.physicsBody = SKPhysicsBody(circleOfRadius: 0.5)
+        // referencedNode.physicsBody!.mass /= 10000
+        // referencedNode.physicsBody!.collisionBitMask = 0b0001
+
         let reference = ObjectGraphReference()
         reference.position = referencedNode.position
-        reference.endGridPosition = CGPoint(x: 0, y: references.count - (1 + i))
+        //reference.endGridPosition = CGPoint(x: 0, y: references.count / 2 - (1 + i))
+        let endY = d.gridPosition.y * -2 - (references.count % 2 != 0 ? 0 : 1)
+        reference.endGridPosition = CGPoint(x: 0, y: endY)
+        //print((references.count, references.count / 2 - (1 + i)))
         scene.addChild(reference)
         self.references.append(reference)
         
@@ -106,10 +113,17 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
 
     addNodes(for: node)
 
-    //updateScale(2.5)
-    updateElementSizes(animated: false)
-
     presentScene(scene)
+
+    updateScale(1 / 2.5)
+    //updateElementSizes(animated: false)
+
+    //let graphBounds = scene.calculateAccumulatedFrame()
+    scene.camera?.position = CGPoint(x: bounds.width / 2, y: bounds.height / 2)
+    //scene.camera?.position = CGPoint(
+    //  x: graphBounds.size.centered(in: bounds).origin.x,
+    //  y: graphBounds.size.centered(in: bounds).origin.y
+    //)
   }
 
   // MARK: - Element Management
@@ -254,19 +268,19 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   }
 
   @objc func handlePressGesture(_ sender: NSPressGestureRecognizer) {
-    if let node = selectedElement as? ObjectGraphNode {
-      node.isSelected = false
-      node.isHighlighted = false
-    }
-
     if let element = element(atViewLocation: sender.location(in: self)) {
+      if let node = selectedElement as? ObjectGraphNode {
+        node.isSelected = false
+        node.isHighlighted = false
+      }
+
       selectedElement = element
 
       if let node = element as? ObjectGraphNode {
         node.isSelected = true
       }
     } else {
-      selectedElement = nil
+      //selectedElement = nil
     }
   }
 
