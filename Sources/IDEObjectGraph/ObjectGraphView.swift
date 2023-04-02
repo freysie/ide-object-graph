@@ -7,6 +7,11 @@ let showsDebugElements = false
   @objc optional func outgoingReferences(for node: ObjectGraphNode) -> [ObjectGraphNode]
 }
 
+@objc public protocol ObjectGraphViewDelegate: NSObjectProtocol {
+  @objc optional func objectGraphView(_ objectGraphView: ObjectGraphView, didClickNode node: ObjectGraphNode)
+  @objc optional func objectGraphView(_ objectGraphView: ObjectGraphView, didDoubleClickNode node: ObjectGraphNode)
+}
+
 public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   public static var defaultAnimationDuration: TimeInterval { 0.25 }
 
@@ -20,6 +25,8 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   var references = [ObjectGraphReference]()
   var debugElements = [ObjectGraphDebugElement]()
   var pivotNodeIdentifier = 0
+
+  var offscreenIndicator: ObjectGraphOffscreenIndicator!
 
   var trackedElement: ObjectGraphElement?
   var highlightedElement: ObjectGraphElement?
@@ -62,7 +69,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     fatalError("init(coder:) has not been implemented")
   }
 
-  func setPivotNode(_ node: ObjectGraphNode) {
+  public func setPivotNode(_ node: ObjectGraphNode) {
     let scene = ObjectGraphScene()
 
     //node.position = CGPoint(x: scene.size.width / 2, y: scene.size.height / 2)
@@ -72,8 +79,21 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     node.addChild(d)
     debugElements.append(d)
 
+    func maxNumberOfSiblingNodes(for node: ObjectGraphNode) -> Int {
+      guard let references = dataSource?.incomingReferences?(for: node) else { return 0 }
+
+//      var references: [ObjectGraphNode]
+//
+//        references = dataSource?.incomingReferences?(for: node) ?? []
+//      } while !references.isEmpty
+
+      return ([references.count] + references.map { maxNumberOfSiblingNodes(for: $0) }).max() ?? 0
+      //return references.map { maxNumberOfSiblingNodes(for: $0) }.reduce(0, +)
+    }
+
     func addNodes(for node: ObjectGraphNode, iteration: Int = 1) {
-      guard let dataSource, let references = dataSource.incomingReferences?(for: node) else { return }
+      guard let references = dataSource?.incomingReferences?(for: node) else { return }
+      //guard let dataSource, let references = dataSource.incomingReferences?(for: node) else { return }
       //print(references)
       //let yStart = references.count == 1 ? 0.0 : (CGFloat(references.count) * cellSize.height) / (references.count % 2 == 0 ? -4 : -4)
       //let yStart = 0.0
@@ -81,11 +101,18 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
       //var yStart = references.count == 1 ? 0.0 : CGFloat(references.count) / -2 * cellSize.height / 2
       //if references.count > 1, references.count % 2 != 0 { yStart -= cellSize.height / 4 }
       let yStart = references.count > 1 ? (cellSize.height / 2 - cellSize.height * CGFloat(references.count) / 2) : 0
+      //print((node.name, maxNumberOfSiblingNodes(for: node)))
 
       for (i, referencedNode) in references.reversed().enumerated() {
+        //print((referencedNode.name, maxNumberOfSiblingNodes(for: referencedNode)))
+        var extraYOffset = 0
+        if references.count > 1, maxNumberOfSiblingNodes(for: referencedNode) > 1 {
+          extraYOffset = maxNumberOfSiblingNodes(for: referencedNode) - 1
+        }
+
         referencedNode.position = CGPoint(
           x: node.position.x - cellSize.width,// * CGFloat(iteration),
-          y: yStart + node.position.y + cellSize.height * CGFloat(i)
+          y: yStart + node.position.y + cellSize.height * CGFloat(i) + cellSize.height / 2.0 * CGFloat(extraYOffset)
         )
         scene.addChild(referencedNode)
         nodes.append(referencedNode)
@@ -101,7 +128,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
         let reference = ObjectGraphReference()
         reference.position = referencedNode.position
         //reference.endGridPosition = CGPoint(x: 0, y: references.count / 2 - (1 + i))
-        let endY = d.gridPosition.y * -2 - (references.count % 2 != 0 ? 0 : 1)
+        let endY = Int(d.gridPosition.y) * -2 - (references.count % 2 != 0 ? 0 : 1) - extraYOffset
         reference.endGridPosition = CGPoint(x: 0, y: endY)
         //print((references.count, references.count / 2 - (1 + i)))
         scene.addChild(reference)
@@ -112,6 +139,10 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     }
 
     addNodes(for: node)
+
+    offscreenIndicator = ObjectGraphOffscreenIndicator()
+    offscreenIndicator.isHidden = true
+    scene.addChild(offscreenIndicator)
 
     presentScene(scene)
 
@@ -180,14 +211,40 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     // }
 
     for node in nodes {
-      node.setScale(scale)
+      if animated {
+        node.removeAction(forKey: Self.scaleAnimationKey)
+        let action = SKAction.scale(to: scale, duration: Self.defaultAnimationDuration)
+        action.timingMode = .easeInEaseOut
+        node.run(action, withKey: Self.scaleAnimationKey)
+      } else {
+        node.setScale(scale)
+      }
       //node.layoutSize = cellSize
       node.layoutSize = CGSize(width: 75.0 / scale, height: 50.0 / scale)
       node.repositionLabel()
     }
 
     for reference in references {
-      reference.setScale(scale)
+      if animated {
+        //reference.removeAction(forKey: Self.scaleAnimationKey)
+        //let action = SKAction.scale(to: scale, duration: Self.defaultAnimationDuration)
+        //action.timingMode = .easeInEaseOut
+        //reference.run(action, withKey: Self.scaleAnimationKey)
+
+        // let action = SKAction.sequence([
+        //   SKAction.fadeOut(withDuration: 0),
+        //   SKAction.scale(to: scale, duration: 0),
+        //   SKAction.fadeIn(withDuration: Self.defaultAnimationDuration)
+        // ])
+        // action.timingMode = .easeInEaseOut
+        // reference.run(action, withKey: Self.scaleAnimationKey)
+
+        reference.setScale(scale)
+
+      } else {
+        reference.setScale(scale)
+      }
+
       //reference.cellSize = 56.0 / scale
       //reference.layoutSize = cellSize
       reference.layoutSize = CGSize(width: 75.0 / scale, height: 50.0 / scale)
@@ -201,6 +258,8 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
       d.isHidden = !showsDebugElements
       d.layoutSize = CGSize(width: 75.0 / scale, height: 50.0 / scale)
     }
+
+    offscreenIndicator.setScale(scale)
   }
 
   // MARK: - Event Handling
@@ -213,6 +272,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
 
   public override func scrollWheel(with event: NSEvent) {
     guard let camera = scene?.camera else { return }
+
     camera.position = CGPoint(
       x: camera.position.x + event.scrollingDeltaX * -1,
       y: camera.position.y + event.scrollingDeltaY
@@ -244,6 +304,9 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
 
   public func magnify(at point: CGPoint, scale: Double, animated: Bool) {
     //guard let camera = scene?.camera else { return }
+
+    //print(scale)
+    let scale = max(min(scale, 0.9), 0.1)
 
 //    var scale = scale <= 1 ? exp(scale - 1) : scale
 //    scale = max(min(point.x, self.scale), scale)

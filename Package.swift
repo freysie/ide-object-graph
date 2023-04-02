@@ -2,15 +2,15 @@
 import PackageDescription
 
 let package = Package(
-  name: "IDEObjectGraph",
+  name: "ide-object-graph",
   platforms: [
+    /// v12 needed for `NSImage.SymbolConfiguration(paletteColors:)` and `NSImage.SymbolConfiguration.applying(_:)`.
     .macOS(.v12),
   ],
   products: [
     .library(name: "IDEObjectGraph", targets: ["IDEObjectGraph"]),
   ],
   targets: [
-    .target(name: "IDEObjectGraph", resources: [.copy("NSObject.png")]),
-    .testTarget(name: "IDEObjectGraphTests", dependencies: ["IDEObjectGraph"]),
+    .target(name: "IDEObjectGraph"),
   ]
 )

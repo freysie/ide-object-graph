@@ -21,7 +21,7 @@ public class ObjectGraphNode: ObjectGraphElement {
     var image = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)!
       .withSymbolConfiguration(
         NSImage.SymbolConfiguration(pointSize: backgroundColor == nil ? 36 : 30, weight: .regular)
-          .applying(NSImage.SymbolConfiguration.init(paletteColors: [backgroundColor == nil ? objectColor : .white]))
+          .applying(NSImage.SymbolConfiguration(paletteColors: [backgroundColor == nil ? objectColor : .white]))
       )!
 
     if let backgroundColor {
@@ -58,6 +58,7 @@ public class ObjectGraphNode: ObjectGraphElement {
     labelNode = SKLabelNode(text: label)
     labelNode.fontName = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize).fontName
     labelNode.fontSize = NSFont.smallSystemFontSize
+    labelNode.fontColor = .textColor
     labelNode.position = CGPoint(x: 0, y: -44)
     labelNode.numberOfLines = 1
     //labelNode.preferredMaxLayoutWidth = 10
@@ -85,7 +86,7 @@ public class ObjectGraphNode: ObjectGraphElement {
   func repositionLabel() {
     labelNode.position = CGPoint(x: 0, y: -44 * labelNode.xScale)
     labelNode.preferredMaxLayoutWidth = layoutSize.width
-    print(labelNode.preferredMaxLayoutWidth)
+    //print(labelNode.preferredMaxLayoutWidth)
   }
 
   func updateSize() {
@@ -106,6 +107,7 @@ public class ObjectGraphNode: ObjectGraphElement {
   }
 
   func updateState() {
+    labelNode.fontColor = isSelected ? .alternateSelectedControlTextColor : .textColor
     iconHighlightNode.isHidden = !(isHighlighted || isSelected)
     labelHighlightNode.isHidden = !(isHighlighted || isSelected)
     iconHighlightNode.fillColor = isSelected ? .controlAccentColor.withAlphaComponent(0.2) : .systemGray.withAlphaComponent(0.25)

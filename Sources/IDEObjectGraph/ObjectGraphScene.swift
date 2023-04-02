@@ -1,5 +1,7 @@
 import SpriteKit
 
+// TODO: remove this and move to `ObjectGraphView`
+
 class ObjectGraphScene: SKScene, NSGestureRecognizerDelegate {
   override init() {
     super.init(size: CGSize(width: 900, height: 420))

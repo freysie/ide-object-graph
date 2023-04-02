@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		3BB2124329D7588A00A957E9 /* IDEObjectGraphExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB2124229D7588A00A957E9 /* IDEObjectGraphExampleApp.swift */; };
 		3BB629B129D758F800D82AD2 /* IDEObjectGraph in Frameworks */ = {isa = PBXBuildFile; productRef = 3BB629B029D758F800D82AD2 /* IDEObjectGraph */; };
+		3BFC9FF129D9ED3F002B0FC2 /* PostgresQueryPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFC9FF029D9ED3F002B0FC2 /* PostgresQueryPlan.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3BB2123F29D7588A00A957E9 /* IDEObjectGraphExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IDEObjectGraphExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BB2124229D7588A00A957E9 /* IDEObjectGraphExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDEObjectGraphExampleApp.swift; sourceTree = "<group>"; };
-		3BB629AE29D758E900D82AD2 /* IDEObjectGraph */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = IDEObjectGraph; path = ..; sourceTree = "<group>"; };
+		3BB629AE29D758E900D82AD2 /* IDEObjectGraph */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = ide-object-graph; path = ..; sourceTree = "<group>"; };
+		3BFC9FF029D9ED3F002B0FC2 /* PostgresQueryPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostgresQueryPlan.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +35,7 @@
 			isa = PBXGroup;
 			children = (
 				3BB2124229D7588A00A957E9 /* IDEObjectGraphExampleApp.swift */,
+				3BFC9FF029D9ED3F002B0FC2 /* PostgresQueryPlan.swift */,
 				3BB629AD29D758E900D82AD2 /* Packages */,
 				3BB2124029D7588A00A957E9 /* Products */,
 				3BB629AF29D758F800D82AD2 /* Frameworks */,
@@ -133,6 +136,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BFC9FF129D9ED3F002B0FC2 /* PostgresQueryPlan.swift in Sources */,
 				3BB2124329D7588A00A957E9 /* IDEObjectGraphExampleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

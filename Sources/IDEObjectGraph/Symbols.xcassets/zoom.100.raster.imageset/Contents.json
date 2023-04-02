@@ -1,12 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "Zoom In-Line_Normal.png",
+      "filename" : "zoom.100.raster.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Zoom In-Line_Normal@2x.png",
+      "filename" : "zoom.100.raster@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
