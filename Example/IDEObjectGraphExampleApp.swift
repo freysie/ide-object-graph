@@ -7,12 +7,12 @@ import Yams
 //let exampleQueryPlan = PostgresQueryPlan(named: "Index Progress")
 //let exampleQueryPlan = PostgresQueryPlan(named: "Mandelbrot Set")
 //let exampleQueryPlan = PostgresQueryPlan(named: "Match Answer Diff")
-//let exampleQueryPlan = PostgresQueryPlan(named: "Match Stats")
+let exampleQueryPlan = PostgresQueryPlan(named: "Match Stats")
 //let exampleQueryPlan = PostgresQueryPlan(named: "Moving Average")
 //let exampleQueryPlan = PostgresQueryPlan(named: "Pie Chart")
 //let exampleQueryPlan = PostgresQueryPlan(named: "Sales by Store")
 //let exampleQueryPlan = PostgresQueryPlan(named: "Sieve of Eratosthenes")
-let exampleQueryPlan = PostgresQueryPlan(named: "Sudoku Solver")
+//let exampleQueryPlan = PostgresQueryPlan(named: "Sudoku Solver")
 //let exampleQueryPlan = PostgresQueryPlan(named: "Vendor with Contacts")
 
 @main
@@ -25,20 +25,22 @@ struct IDEObjectGraphExampleApp: App {
   }
 }
 
-class QueryPlanViewController: ObjectGraphViewController {
+class QueryPlanViewController: ObjectGraphViewController, NSPopoverDelegate {
   var popover: NSPopover?
 
   override func loadView() {
     super.loadView()
 
-    graphView.setPivotNode(exampleQueryPlan.objectGraphNode)
+    DispatchQueue.main.async {
+      self.graphView.setPivotNode(exampleQueryPlan.objectGraphNode)
+    }
   }
 
   override func incomingReferences(for node: ObjectGraphNode) -> [ObjectGraphNode] {
     (node.representedObject as? PostgresQueryPlan)?.subplans.map { $0.objectGraphNode } ?? []
   }
 
-  func objectGraphView(_ objectGraphView: ObjectGraphView, didDoubleClickNode node: ObjectGraphNode) {
+  func objectGraphView(_ objectGraphView: ObjectGraphView, didClickNode node: ObjectGraphNode) {
     popover?.close()
 
     guard let plan = node.representedObject as? PostgresQueryPlan else { return }
@@ -51,12 +53,21 @@ class QueryPlanViewController: ObjectGraphViewController {
     let rect = CGRect(x: location.x - 44 / 2, y: location.y - 44 / 2, width: 44, height: 44)
 
     let popover = NSPopover()
+    popover.delegate = self
     popover.behavior = .transient
     //popover.contentSize = NSSize(width: 560, height: 380)
     popover.contentSize = NSSize(width: 450, height: 350)
     popover.contentViewController = NSHostingController(rootView: detailsView)
     popover.show(relativeTo: rect.insetBy(dx: -3, dy: -3), of: view, preferredEdge: .maxY)
     self.popover = popover
+  }
+
+  func popoverDidShow(_ notification: Notification) {
+    graphView.isPaused = true
+  }
+
+  func popoverDidClose(_ notification: Notification) {
+    graphView.isPaused = false
   }
 }
 
@@ -79,8 +90,6 @@ struct QueryPlanDetailsView: View {
         TableColumn("Value", value: \.value)
       }
       .tableStyle(.bordered(alternatesRowBackgrounds: true))
-      //.cornerRadius(30)
-      //.overlay { RoundedRectangle(cornerRadius: 3).inset(by: 0.5).stroke(.separator) }
 
       if let pair = details.first(where: { Self.separatedKeys.contains($0.key) }) {
         VStack(alignment: .leading, spacing: 5) {
@@ -92,7 +101,6 @@ struct QueryPlanDetailsView: View {
             .cornerRadius(3)
             .overlay { RoundedRectangle(cornerRadius: 3).inset(by: 0.5).stroke(.separator) }
             .frame(height: 60)
-            //.fixedSize()
         }
       }
     }
@@ -104,8 +112,5 @@ extension PostgresQueryPlan {
   init(named name: String) {
     let string = try! String(contentsOf: Bundle.main.url(forResource: "Query Plans/\(name)", withExtension: "json")!)
     self.init(try! Yams.compose(yaml: string)!)!
-
-    //let data = try! Data(contentsOf: Bundle.main.url(forResource: "Query Plans/\(name)", withExtension: "json")!)
-    //self.init(try! JSONSerialization.jsonObject(with: data, options: []))!
   }
 }

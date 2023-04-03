@@ -7,3 +7,7 @@ class ObjectGraphLayoutManager: NSObject {
 class ObjectGraphGridLayoutManager: ObjectGraphLayoutManager {
   override func layout() {}
 }
+
+class ObjectGraphCircularLayoutManager: ObjectGraphLayoutManager {
+  override func layout() {}
+}

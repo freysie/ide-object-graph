@@ -1,5 +1,9 @@
 import SpriteKit
 
+// TODO: align with pixel boundaries
+// TODO: redraw while resizing view
+// TODO: either redraw or hide arrows while zooming using zoom buttons
+
 let showsDebugElements = false
 
 @objc public protocol ObjectGraphViewDataSource: NSObjectProtocol {
@@ -38,7 +42,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
 
   var layoutManager = ObjectGraphGridLayoutManager()
 
-  var scale = 1.0 // 2.5
+  var scale = 0.4
   var cellSize = CGSize(width: 75, height: 50)
 
   public override init(frame frameRect: CGRect) {
@@ -83,6 +87,8 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   public func setPivotNode(_ node: ObjectGraphNode) {
     let scene = ObjectGraphScene()
 
+    //node.position = .zero
+    //print(scene.size.width)
     //node.position = CGPoint(x: scene.size.width / 2, y: scene.size.height / 2)
     scene.addChild(node)
     nodes.append(node)
@@ -99,9 +105,10 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
 //      } while !references.isEmpty
 
       return ([references.count] + references.map { maxNumberOfSiblingNodes(for: $0) }).max() ?? 0
-      //return references.map { maxNumberOfSiblingNodes(for: $0) }.reduce(0, +)
     }
 
+    // TODO: clean this up and move parts of it to `ObjectGraphLayoutManager`
+    // TODO: finesse node positioning
     func addNodes(for node: ObjectGraphNode, iteration: Int = 1) {
       guard let references = dataSource?.incomingReferences?(for: node) else { return }
       //guard let dataSource, let references = dataSource.incomingReferences?(for: node) else { return }
@@ -160,12 +167,14 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     updateScale(1 / 2.5)
     //updateElementSizes(animated: false)
 
-    //let graphBounds = scene.calculateAccumulatedFrame()
-    scene.camera?.position = CGPoint(x: bounds.width / 2, y: bounds.height / 2)
-    //scene.camera?.position = CGPoint(
-    //  x: graphBounds.size.centered(in: bounds).origin.x,
-    //  y: graphBounds.size.centered(in: bounds).origin.y
-    //)
+    //scene.camera?.position = CGPoint(x: bounds.width / 2, y: bounds.height / 2)
+    //scene.camera?.position = node.position
+
+    let graphBounds = scene.calculateAccumulatedFrame()
+    scene.camera?.position = CGPoint(
+      x: graphBounds.size.centered(in: bounds).origin.x,
+      y: graphBounds.size.centered(in: bounds).origin.y / -2
+    )
   }
 
   // MARK: - Element Management
@@ -194,6 +203,27 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   // func cameraScale(forScale scale: Double) -> Double {
   //   1 / min(scale, 1)
   // }
+
+  var linearScaleFactor: Double {
+    scale < 1 ? log(scale) + 1 : scale
+  }
+
+  public func magnify(at point: CGPoint, scale: Double, animated: Bool) {
+    //guard let camera = scene?.camera else { return }
+
+    //print(scale)
+    let scale = max(min(scale, 0.9), 0.1)
+
+//    var scale = scale <= 1 ? exp(scale - 1) : scale
+//    scale = max(min(point.x, self.scale), scale)
+    //print(scale)
+
+
+//        let newScale = min(initialMagnificationScale * 1 / abs(sender.magnification + 1), 2)
+    //    camera.setScale(scale)
+
+    updateScale(scale, animated: animated)
+  }
 
   func updateScale(_ scale: Double, animated: Bool = false) {
     guard let camera = scene?.camera else { return }
@@ -262,7 +292,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
       d.layoutSize = cellSize
     }
 
-    offscreenIndicator.setScale(scale)
+    offscreenIndicator?.setScale(scale)
   }
 
   // MARK: - Event Handling
@@ -273,8 +303,9 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     }
   }
 
+  // FIXME: somehow starting the scroll horizontally doesn’t work (seemingly also an issue in Xcode’s memory graph view tho)
   public override func scrollWheel(with event: NSEvent) {
-    guard let camera = scene?.camera else { return }
+    guard !isPaused, let camera = scene?.camera else { return }
 
     camera.position = CGPoint(
       x: camera.position.x + event.scrollingDeltaX * -1,
@@ -285,7 +316,7 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
   // MARK: - Gesture Handling
 
   @objc func handlePanGesture(_ sender: NSPanGestureRecognizer) {
-    guard let camera = scene?.camera else { return }
+    guard !isPaused, let camera = scene?.camera else { return }
 
     if sender.state == .began {
       initialPanPosition = camera.position
@@ -301,42 +332,27 @@ public class ObjectGraphView: SKView, NSGestureRecognizerDelegate {
     camera.position = newPosition
   }
 
-  var linearScaleFactor: Double {
-    scale < 1 ? log(scale) + 1 : scale
-  }
-
-  public func magnify(at point: CGPoint, scale: Double, animated: Bool) {
-    //guard let camera = scene?.camera else { return }
-
-    //print(scale)
-    let scale = max(min(scale, 0.9), 0.1)
-
-//    var scale = scale <= 1 ? exp(scale - 1) : scale
-//    scale = max(min(point.x, self.scale), scale)
-    //print(scale)
-
-
-//        let newScale = min(initialMagnificationScale * 1 / abs(sender.magnification + 1), 2)
-    //    camera.setScale(scale)
-
-    updateScale(scale, animated: animated)
-  }
-
   @objc func handleMagnificationGesture(_ sender: NSMagnificationGestureRecognizer) {
-    guard let camera = scene?.camera else { return }
+    guard !isPaused, let camera = scene?.camera else { return }
 
     if sender.state == .began {
       //initialMagnificationScale = linearScaleFactor
       initialMagnificationScale = camera.xScale
     }
 
-    magnify(at: sender.location(in: self), scale: initialMagnificationScale + sender.magnification, animated: false)
+    magnify(at: sender.location(in: self), scale: initialMagnificationScale - sender.magnification, animated: false)
   }
 
   @objc func handleClickGesture(_ sender: NSClickGestureRecognizer) {
     //print((#function, sender))
 
     if let node = element(atViewLocation: sender.location(in: self)) as? ObjectGraphNode {
+      // if let selectedNode = selectedElement as? ObjectGraphNode {
+      //   selectedNode.isSelected = false
+      //   selectedNode.isHighlighted = false
+      // }
+
+      // node.isSelected = true
       graphDelegate?.objectGraphView?(self, didClickNode: node)
     }
   }

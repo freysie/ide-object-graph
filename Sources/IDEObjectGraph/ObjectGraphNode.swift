@@ -17,10 +17,16 @@ public class ObjectGraphNode: ObjectGraphElement {
 
   override var layoutSize: CGSize { didSet { updateSize() } }
 
-  public convenience init(systemSymbolName: String, backgroundColor: NSColor? = nil, label: String, badge: String? = nil) {
+  public convenience init(
+    systemSymbolName: String,
+    backgroundColor: NSColor? = nil,
+    pointSize: CGFloat? = nil,
+    label: String,
+    badge: String? = nil
+  ) {
     var image = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)!
       .withSymbolConfiguration(
-        NSImage.SymbolConfiguration(pointSize: backgroundColor == nil ? 36 : 30, weight: .regular)
+        NSImage.SymbolConfiguration(pointSize: pointSize ?? (backgroundColor == nil ? 36 : 30), weight: .regular)
           .applying(NSImage.SymbolConfiguration(paletteColors: [backgroundColor == nil ? objectColor : .white]))
       )!
 
