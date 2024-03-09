@@ -8,7 +8,7 @@ Object graph UI for AppKit.
 ## Installation
 
 ```swift
-.package(url: "https://github.com/freyaalminde/ide-object-graph.git", branch: "main"),
+.package(url: "https://github.com/freysie/ide-object-graph.git", branch: "main"),
 ```
 
 ```swift
